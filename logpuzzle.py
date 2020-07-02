@@ -20,6 +20,8 @@ import sys
 import urllib.request
 import argparse
 
+author = "Kevin Blount"
+
 
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
@@ -27,7 +29,9 @@ def read_urls(filename):
     alphabetically in increasing order, and screening out duplicates.
     """
     # +++your code here+++
-    pass
+    with open(filename) as f:
+        url_file = f.read()
+        print(url_file)
 
 
 def download_images(img_urls, dest_dir):
@@ -63,6 +67,7 @@ def main(args):
     parsed_args = parser.parse_args(args)
 
     img_urls = read_urls(parsed_args.logfile)
+    print(img_urls)
 
     if parsed_args.todir:
         download_images(img_urls, parsed_args.todir)
