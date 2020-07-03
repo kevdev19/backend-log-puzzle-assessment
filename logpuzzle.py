@@ -19,7 +19,7 @@ import re
 import sys
 import urllib.request
 import argparse
-import requests
+
 
 author = "Kevin Blount"
 
@@ -63,7 +63,7 @@ def download_images(img_urls, dest_dir):
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
-    index = file(os.path.join(dest_dir, 'index.html'), 'w')
+    index = open(os.path.join(dest_dir, 'index.html'), 'w')
     index.write('<html><body>\n')
 
     i = 0
