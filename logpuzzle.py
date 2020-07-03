@@ -19,8 +19,17 @@ import re
 import sys
 import urllib.request
 import argparse
+import requests
 
 author = "Kevin Blount"
+
+
+def url_sort_key(url):
+    match = re.search(r'-(\w+)-(\w+)\.\w+', url)
+    if match:
+        return match.group(2)
+    else:
+        return url
 
 
 def read_urls(filename):
@@ -28,10 +37,19 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    with open(filename) as f:
-        url_file = f.read()
-        print(url_file)
+    underbar = filename.index('_')
+    host = filename[underbar + 1:]
+    url_dict = {}
+
+    with open(filename, 'r') as f:
+        for line in f:
+            match = re.search(r'"GET (\S+)', line)
+            if match:
+                path = match.group(1)
+                if 'puzzle' in path:
+                    url_dict['http://' + host + path] = 1
+
+    return sorted(url_dict.keys(), key=url_sort_key)
 
 
 def download_images(img_urls, dest_dir):
@@ -42,8 +60,24 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    index = file(os.path.join(dest_dir, 'index.html'), 'w')
+    index.write('<html><body>\n')
+
+    i = 0
+    for img_url in img_urls:
+        i += 1
+        local_name = 'img%d' % i
+        print('Retrieving...', img_urls)
+        urllib.request.urlretrieve(img_url, os.path.join(dest_dir, local_name))
+
+        index.write('<img src="%s">' % (local_name,))
+        i += 1
+
+    index.write('\n</body></html>\n')
+    index.close()
 
 
 def create_parser():
@@ -67,12 +101,13 @@ def main(args):
     parsed_args = parser.parse_args(args)
 
     img_urls = read_urls(parsed_args.logfile)
-    print(img_urls)
 
     if parsed_args.todir:
         download_images(img_urls, parsed_args.todir)
     else:
         print('\n'.join(img_urls))
+
+    return img_urls
 
 
 if __name__ == '__main__':
